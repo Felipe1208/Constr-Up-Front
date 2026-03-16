@@ -12,7 +12,7 @@
     <div class="filters-grid">
       <div class="field">
         <label>ID</label>
-        <input v-model="local.id" type="text" placeholder="ex: 1" @keydown.enter="handleFilter" />
+        <input v-model="local.id" type="text" inputmode="numeric" placeholder="ex: 1" @keydown="onlyInteger" @input="sanitizeInteger($event, 'id')" @keydown.enter="handleFilter" />
       </div>
       <div class="field">
         <label>Produto</label>
@@ -28,11 +28,11 @@
       </div>
       <div class="field">
         <label>Preço</label>
-        <input v-model="local.price" type="number" min="0" step="0.01" placeholder="ex: 150.00" @keydown.enter="handleFilter" />
+        <input v-model="local.price" type="text" inputmode="decimal" placeholder="ex: 150.00" @keydown="onlyDecimal" @input="sanitizeDecimal($event, 'price')" @keydown.enter="handleFilter" />
       </div>
       <div class="field">
         <label>Por página</label>
-        <input v-model="local.per_page" type="number" min="1" placeholder="ex: 10" @keydown.enter="handleFilter" />
+        <input v-model="local.per_page" type="text" inputmode="numeric" placeholder="ex: 10" @keydown="onlyInteger" @input="sanitizeInteger($event, 'per_page')" @keydown.enter="handleFilter" />
       </div>
       <div class="field">
         <label>Ordenar por</label>
@@ -74,6 +74,37 @@
 import { reactive } from 'vue'
 
 const emit = defineEmits(['filter', 'clear'])
+
+// ── Helpers de input numérico ──────────────────────────────────
+const ALLOWED_KEYS = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End']
+
+function onlyInteger(e) {
+  if (ALLOWED_KEYS.includes(e.key)) return
+  if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) return
+  if (!/^\d$/.test(e.key)) e.preventDefault()
+}
+
+function onlyDecimal(e) {
+  if (ALLOWED_KEYS.includes(e.key)) return
+  if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) return
+  if (e.key === '.' || e.key === ',') {
+    const val = e.target.value
+    const start = e.target.selectionStart
+    const end = e.target.selectionEnd
+    const remaining = val.slice(0, start) + val.slice(end)
+    if (!remaining.includes('.') && !remaining.includes(',')) return
+  }
+  if (!/^\d$/.test(e.key)) e.preventDefault()
+}
+
+function sanitizeInteger(e, field) {
+  local[field] = e.target.value.replace(/\D/g, '')
+}
+
+function sanitizeDecimal(e, field) {
+  local[field] = e.target.value.replace(/[^\d.,]/g, '').replace(',', '.')
+}
+// ──────────────────────────────────────────────────────────────
 
 const emptyState = () => ({
   id: '',

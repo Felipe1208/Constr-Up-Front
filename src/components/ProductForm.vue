@@ -43,7 +43,7 @@
               <label>Preço <span class="required">*</span></label>
               <div class="input-prefix-wrap">
                 <span class="input-prefix">R$</span>
-                <input v-model="form.price" type="number" min="0" step="0.01" placeholder="0,00" class="with-prefix" />
+                <input v-model="form.price" type="text" inputmode="decimal" placeholder="0,00" class="with-prefix" @keydown="onlyDecimal" @input="sanitizeDecimal($event, 'price')" />
               </div>
               <span v-if="errors.price" class="field-error">{{ errors.price }}</span>
             </div>
@@ -51,7 +51,7 @@
               <label>Estoque <span class="required">*</span></label>
               <div class="input-prefix-wrap">
                 <span class="input-prefix">un.</span>
-                <input v-model="form.stock" type="number" min="0" step="1" placeholder="0" class="with-prefix" />
+                <input v-model="form.stock" type="text" inputmode="numeric" placeholder="0" class="with-prefix" @keydown="onlyInteger" @input="sanitizeInteger($event, 'stock')" />
               </div>
               <span v-if="errors.stock" class="field-error">{{ errors.stock }}</span>
             </div>
@@ -74,6 +74,40 @@
 <script setup>
 import { reactive, watch, computed } from 'vue'
 
+// ── Helpers de input numérico ──────────────────────────────────
+const ALLOWED_KEYS = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End']
+
+function onlyInteger(e) {
+  if (ALLOWED_KEYS.includes(e.key)) return
+  if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) return
+  if (!/^\d$/.test(e.key)) e.preventDefault()
+}
+
+function onlyDecimal(e) {
+  if (ALLOWED_KEYS.includes(e.key)) return
+  if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) return
+  if (e.key === '.' || e.key === ',') {
+    const val = e.target.value
+    const start = e.target.selectionStart
+    const end = e.target.selectionEnd
+    // remove a parte selecionada e verifica se já há separador no restante
+    const remaining = val.slice(0, start) + val.slice(end)
+    if (!remaining.includes('.') && !remaining.includes(',')) return
+  }
+  if (!/^\d$/.test(e.key)) e.preventDefault()
+}
+
+function sanitizeInteger(e, field) {
+  const clean = e.target.value.replace(/\D/g, '')
+  form[field] = clean
+}
+
+function sanitizeDecimal(e, field) {
+  const clean = e.target.value.replace(/[^\d.,]/g, '').replace(',', '.')
+  form[field] = clean
+}
+// ──────────────────────────────────────────────────────────────
+
 const props = defineProps({
   product: { type: Object, default: null },
   saving:  { type: Boolean, default: false },
@@ -93,8 +127,8 @@ watch(
       form.product     = p.product     ?? ''
       form.brand       = p.brand       ?? ''
       form.description = p.description ?? ''
-      form.price       = p.price       ?? ''
-      form.stock       = p.stock       ?? ''
+      form.price       = p.price  != null ? String(p.price)  : ''
+      form.stock       = p.stock  != null ? String(p.stock)  : ''
     }
   },
   { immediate: true }
@@ -307,6 +341,8 @@ function handleBackdropClick() {
   overflow: hidden;
   background: var(--bg);
   transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+  min-width: 0;
 }
 
 .input-prefix-wrap:focus-within {
@@ -328,6 +364,8 @@ function handleBackdropClick() {
 
 .with-prefix {
   flex: 1;
+  min-width: 0;
+  width: 0;
   border: none !important;
   background: transparent;
   padding: 0.52rem 0.6rem;

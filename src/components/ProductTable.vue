@@ -286,8 +286,8 @@ function stockClass(stock) {
 .stock-badge.low { background: color-mix(in srgb, #f59e0b 15%, transparent); color: #b45309; }
 .stock-badge.out { background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger); }
 
-html.dark .stock-badge.ok  { color: #4ade80; }
-html.dark .stock-badge.low { color: #fbbf24; }
+html.dark :deep(.stock-badge.ok)  { color: #4ade80; }
+html.dark :deep(.stock-badge.low) { color: #fbbf24; }
 
 /* ── Actions ── */
 .actions-cell {

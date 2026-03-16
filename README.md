@@ -1,6 +1,14 @@
-# Construp Front — Gestão de Produtos
+# Constr Up — Gestão de Produtos
 
 Interface Vue.js 3 para CRUD completo de produtos, consumindo a API REST da Construp.
+
+---
+
+## Screenshots
+
+| Modo Claro | Modo Escuro |
+|---|---|
+| ![Modo Claro](docs/screenshot-light.png) | ![Modo Escuro](docs/screenshot-dark.png) |
 
 ---
 
