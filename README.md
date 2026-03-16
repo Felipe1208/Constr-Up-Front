@@ -1,10 +1,14 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/vuejs/art/master/logo.svg" width="80" alt="Vue.js" />
+</p>
+
 # Constr Up — Gestão de Produtos
 
 Interface Vue.js 3 para CRUD completo de produtos, consumindo a API REST da Construp.
 
 ---
 
-## Screenshots
+## Temas
 
 | Modo Claro | Modo Escuro |
 |---|---|
